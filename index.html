@@ -27,39 +27,12 @@
       margin: 0 auto;
     }
 
-    /* Mode Tabs */
-    .tab-bar {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 12px;
-      background: #e9ecef;
-      padding: 4px;
-      border-radius: 8px;
-    }
-    .tab-btn {
-      flex: 1;
-      padding: 8px 4px;
-      font-size: 13px;
-      font-weight: 600;
-      text-align: center;
-      border-radius: 6px;
-      color: var(--muted);
-      cursor: pointer;
-      border: none;
-      background: transparent;
-      transition: all 0.2s ease;
-    }
-    .tab-btn.active {
-      background: #ffffff;
-      color: var(--primary);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
+    /* Single Header (No other options/tabs) */
     .header-title {
-      font-size: 16px;
+      font-size: 17px;
       font-weight: 700;
       text-align: center;
-      padding: 10px;
+      padding: 12px;
       background: var(--card);
       border-radius: 8px;
       border: 1px solid var(--border);
@@ -92,7 +65,7 @@
 
     input, select {
       width: 100%;
-      padding: 8px 10px;
+      padding: 9px 10px;
       margin-bottom: 10px;
       border: 1px solid var(--border);
       border-radius: 6px;
@@ -100,7 +73,7 @@
       background: #fff;
     }
 
-    /* Add Item Row Layout as per Screenshot */
+    /* Add Item Layout */
     .add-item-box {
       margin-bottom: 12px;
     }
@@ -120,7 +93,7 @@
     }
     .btn-add-submit {
       padding: 8px 16px;
-      background: #1976d2;
+      background: var(--primary);
       color: #fff;
       font-weight: 700;
       font-size: 13px;
@@ -128,20 +101,20 @@
       border-radius: 6px;
       cursor: pointer;
       white-space: nowrap;
-      height: 35px;
+      height: 36px;
     }
     .btn-add-submit:hover {
       background: var(--primary-hover);
     }
 
-    /* Selected Items Table Layout */
+    /* Selected Items Table */
     .selected-items-wrapper {
       margin-top: 10px;
     }
     .table-responsive {
       overflow-x: auto;
       border: 1px solid #e1e4e8;
-      border-radius: 4px;
+      border-radius: 6px;
     }
     table {
       width: 100%;
@@ -165,16 +138,16 @@
       border-bottom: none;
     }
     .empty-state {
-      padding: 12px 10px;
+      padding: 14px 10px;
       color: #8c959f;
-      font-style: normal;
+      text-align: center;
     }
 
     .btn-remove-row {
       background: transparent;
       border: none;
       color: var(--danger);
-      font-size: 15px;
+      font-size: 16px;
       font-weight: bold;
       cursor: pointer;
       padding: 2px 6px;
@@ -182,7 +155,7 @@
 
     .submit-button {
       width: 100%;
-      padding: 12px;
+      padding: 13px;
       font-size: 15px;
       font-weight: 700;
       background: var(--primary);
@@ -207,21 +180,15 @@
 </head>
 <body>
 
-  <!-- Mode Bar -->
-  <div class="tab-bar">
-    <button type="button" class="tab-btn" id="tabDC" onclick="switchMode('DC')">📄 Delivery Challan (DC)</button>
-    <button type="button" class="tab-btn" id="tabGRN" onclick="switchMode('GRN')">📥 GRN</button>
-    <button type="button" class="tab-btn" id="tabBOM" onclick="switchMode('BOM')">📋 BOM</button>
-  </div>
-
-  <div class="header-title" id="formHeaderTitle">Operations Desk</div>
+  <!-- Dynamic Header: Shows ONLY the current mode -->
+  <div class="header-title" id="formHeaderTitle">Loading Form...</div>
 
   <div id="mainFormContainer">
     <!-- Party Block -->
     <div class="card">
-      <div class="card-title">Party & Site Information</div>
+      <div class="card-title" id="partyBlockTitle">Party Information</div>
       
-      <!-- DC & BOM -->
+      <!-- DC & BOM Party Section -->
       <div id="clientBlock">
         <label>Client / Buyer Name:</label>
         <select id="clientSelect" onchange="onClientChange()">
@@ -245,7 +212,7 @@
         </div>
       </div>
 
-      <!-- GRN -->
+      <!-- GRN Vendor Section -->
       <div id="vendorBlock" class="hidden">
         <label>Vendor / Supplier Name:</label>
         <select id="vendorSelect" onchange="onVendorChange()">
@@ -261,13 +228,12 @@
       </div>
     </div>
 
-    <!-- Items Section (Exact Screenshot Style) -->
+    <!-- Items Section -->
     <div class="card">
-      <!-- Search & Add Bar -->
       <div class="add-item-box">
         <div class="card-title">Add Item</div>
         <div class="add-item-row">
-          <input list="itemsDataList" id="itemSearchInput" class="input-search-item" placeholder="Type to search item..." onchange="onSearchItemPick()">
+          <input list="itemsDataList" id="itemSearchInput" class="input-search-item" placeholder="Type to search item...">
           <datalist id="itemsDataList"></datalist>
 
           <input type="number" id="itemQtyInput" class="input-qty-item" value="1" min="1" placeholder="Qty">
@@ -275,7 +241,6 @@
         </div>
       </div>
 
-      <!-- Selected Items Table -->
       <div class="selected-items-wrapper">
         <div class="card-title">Selected Items</div>
         <div class="table-responsive">
@@ -283,7 +248,7 @@
             <thead id="itemsThead"></thead>
             <tbody id="itemsTbody">
               <tr>
-                <td colspan="4" class="empty-state">No items added yet - search above and tap + Add.</td>
+                <td colspan="5" class="empty-state">No items added yet - search above and tap + Add.</td>
               </tr>
             </tbody>
           </table>
@@ -299,57 +264,46 @@
   <script>
     var SCRIPT_ENDPOINT = "https://script.google.com/macros/s/AKfycbzcRCukDoJQWyERBD61i_MkEexI45ZTh6LGpLxawPtA9qxFXL9blQ9PJFLvhFDh31Yy/exec";
 
+    // Auto case-insensitive check
     var urlParams = new URLSearchParams(window.location.search);
-    var rawMode = urlParams.get('mode') || "DC";
-    var currentMode = rawMode.toString().trim().toUpperCase();
-    if (currentMode !== "DC" && currentMode !== "GRN" && currentMode !== "BOM") {
-      currentMode = "DC";
-    }
+    var rawMode = (urlParams.get('mode') || "DC").toString().trim().toUpperCase();
+    var currentMode = (rawMode === "GRN" || rawMode === "BOM") ? rawMode : "DC";
 
     var userChatId = urlParams.get('chatId') || "";
     var masterData = { clients: [], vendors: [], items: [] };
     var selectedItemsArray = [];
 
-    function switchMode(newMode) {
-      currentMode = newMode.toUpperCase();
-      applyFormMode();
-      selectedItemsArray = [];
-      renderSelectedItemsTable();
-    }
-
-    function applyFormMode() {
+    function setupPageMode() {
       var titleDiv = document.getElementById('formHeaderTitle');
       var clientBlock = document.getElementById('clientBlock');
       var vendorBlock = document.getElementById('vendorBlock');
       var posWrapper = document.getElementById('posWrapper');
       var bomMetaWrapper = document.getElementById('bomMetaWrapper');
-
-      document.querySelectorAll('.tab-btn').forEach(function(el) { el.classList.remove('active'); });
-      var activeTab = document.getElementById('tab' + currentMode);
-      if (activeTab) activeTab.classList.add('active');
+      var thead = document.getElementById('itemsThead');
 
       if (currentMode === "DC") {
         titleDiv.textContent = "📄 Delivery Challan (DC)";
         clientBlock.classList.remove('hidden');
+        vendorBlock.classList.add('hidden');
         posWrapper.classList.remove('hidden');
         bomMetaWrapper.classList.add('hidden');
-        vendorBlock.classList.add('hidden');
+        thead.innerHTML = "<tr><th>Item</th><th style='width:65px;'>HSN</th><th style='width:55px;'>Qty</th><th style='width:50px;'>Unit</th><th style='width:30px;'></th></tr>";
       } else if (currentMode === "GRN") {
         titleDiv.textContent = "📥 Goods Receipt Note (GRN)";
         clientBlock.classList.add('hidden');
         vendorBlock.classList.remove('hidden');
+        thead.innerHTML = "<tr><th>Item</th><th style='width:55px;'>Billed</th><th style='width:55px;'>Rcvd</th><th style='width:55px;'>Acc</th><th style='width:30px;'></th></tr>";
       } else if (currentMode === "BOM") {
-        titleDiv.textContent = "📋 BOM Requisition";
+        titleDiv.textContent = "📋 BOM Material Requisition";
         clientBlock.classList.remove('hidden');
+        vendorBlock.classList.add('hidden');
         posWrapper.classList.add('hidden');
         bomMetaWrapper.classList.remove('hidden');
-        vendorBlock.classList.add('hidden');
+        thead.innerHTML = "<tr><th>Material Description</th><th style='width:70px;'>Qty</th><th style='width:60px;'>Unit</th><th style='width:30px;'></th></tr>";
       }
-
-      renderTableHeaders();
     }
 
-    applyFormMode();
+    setupPageMode();
 
     fetch(SCRIPT_ENDPOINT + "?action=getMasterData")
       .then(function(res) { return res.json(); })
@@ -380,7 +334,6 @@
         });
       }
 
-      // Populate Datalist for autocomplete search
       var dList = document.getElementById('itemsDataList');
       dList.innerHTML = "";
       if (masterData.items) {
@@ -411,17 +364,6 @@
       }
     }
 
-    function renderTableHeaders() {
-      var thead = document.getElementById('itemsThead');
-      if (currentMode === "DC") {
-        thead.innerHTML = "<tr><th>Item</th><th style='width:70px;'>HSN</th><th style='width:60px;'>Qty</th><th style='width:50px;'>Unit</th><th style='width:30px;'></th></tr>";
-      } else if (currentMode === "GRN") {
-        thead.innerHTML = "<tr><th>Item</th><th style='width:60px;'>Billed</th><th style='width:60px;'>Rcvd</th><th style='width:60px;'>Acc</th><th style='width:30px;'></th></tr>";
-      } else if (currentMode === "BOM") {
-        thead.innerHTML = "<tr><th>Material Description</th><th style='width:70px;'>Qty</th><th style='width:60px;'>Unit</th><th style='width:30px;'></th></tr>";
-      }
-    }
-
     function addPickedItemToList() {
       var nameInput = document.getElementById('itemSearchInput');
       var qtyInput = document.getElementById('itemQtyInput');
@@ -434,7 +376,6 @@
         return;
       }
 
-      // Find if master data has unit/hsn
       var hsn = "N/A";
       var unit = "Nos";
       if (masterData.items) {
@@ -457,10 +398,8 @@
         acceptedQty: qtyVal
       });
 
-      // Clear input fields for next entry
       nameInput.value = "";
       qtyInput.value = "1";
-
       renderSelectedItemsTable();
     }
 
@@ -592,7 +531,7 @@
       .then(function() {
         document.getElementById('mainFormContainer').style.display = 'none';
         statusMsg.innerHTML = `
-          <div style="background:#e8f5e9; border: 1px solid #81c784; padding:20px; border-radius:8px; margin-top:15px; color:#2e7d32; text-align:center;">
+          <div style="background:#e8f5e9; border: 1px solid #81c784; padding:24px; border-radius:8px; margin-top:15px; color:#2e7d32; text-align:center;">
             <div style="font-size:36px; margin-bottom:8px;">✅</div>
             <b style="font-size:16px;">Document Submitted Successfully!</b><br>
             <p style="font-size:13px; color:#555; margin-top:6px;">Document is generated and saved in Google Drive.</p>

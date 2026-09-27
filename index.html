@@ -94,7 +94,7 @@
       cursor: pointer;
       margin-top: 8px;
     }
-    .hidden { display: none; }
+    .hidden { display: none !important; }
     .status-msg {
       text-align: center;
       font-size: 13px;
@@ -105,7 +105,7 @@
 </head>
 <body>
 
-  <div class="header-bar" id="formHeaderTitle">Loading Operations Form...</div>
+  <div class="header-bar" id="formHeaderTitle">Operations Desk</div>
 
   <div id="mainFormContainer">
     <div class="card">
@@ -169,65 +169,76 @@
   <script>
     var SCRIPT_ENDPOINT = "https://script.google.com/macros/s/AKfycbzcRCukDoJQWyERBD61i_MkEexI45ZTh6LGpLxawPtA9qxFXL9blQ9PJFLvhFDh31Yy/exec";
 
-    // URL parameters fetch karein
+    // URL parameters fetch & sanitize to uppercase
     var urlParams = new URLSearchParams(window.location.search);
-    var currentMode = urlParams.get('mode') || "DC";
+    var rawMode = urlParams.get('mode') || "DC";
+    var currentMode = rawMode.toUpperCase().trim();
     var userChatId = urlParams.get('chatId') || "";
 
     var masterData = { clients: [], vendors: [], items: [] };
 
     function applyFormMode() {
       var titleDiv = document.getElementById('formHeaderTitle');
+      var clientBlock = document.getElementById('clientBlock');
+      var vendorBlock = document.getElementById('vendorBlock');
+      var posWrapper = document.getElementById('posWrapper');
+      var bomMetaWrapper = document.getElementById('bomMetaWrapper');
+
       if (currentMode === "DC") {
         titleDiv.textContent = "📄 Delivery Challan (DC)";
-        document.getElementById('clientBlock').classList.remove('hidden');
-        document.getElementById('posWrapper').classList.remove('hidden');
-        document.getElementById('bomMetaWrapper').classList.add('hidden');
-        document.getElementById('vendorBlock').classList.add('hidden');
+        clientBlock.classList.remove('hidden');
+        posWrapper.classList.remove('hidden');
+        bomMetaWrapper.classList.add('hidden');
+        vendorBlock.classList.add('hidden');
       } else if (currentMode === "GRN") {
         titleDiv.textContent = "📥 Goods Receipt Note (GRN)";
-        document.getElementById('clientBlock').classList.add('hidden');
-        document.getElementById('vendorBlock').classList.remove('hidden');
+        clientBlock.classList.add('hidden');
+        vendorBlock.classList.remove('hidden');
       } else if (currentMode === "BOM") {
         titleDiv.textContent = "📋 BOM Requisition";
-        document.getElementById('clientBlock').classList.remove('hidden');
-        document.getElementById('posWrapper').classList.add('hidden');
-        document.getElementById('bomMetaWrapper').classList.remove('hidden');
-        document.getElementById('vendorBlock').classList.add('hidden');
+        clientBlock.classList.remove('hidden');
+        posWrapper.classList.add('hidden');
+        bomMetaWrapper.classList.remove('hidden');
+        vendorBlock.classList.add('hidden');
       }
       renderItemsTableStructure();
     }
 
-    // Master data fetch from Apps Script API
+    // 1. Immediately apply mode to UI layout
+    applyFormMode();
+
+    // 2. Fetch master data in background
     fetch(SCRIPT_ENDPOINT + "?action=getMasterData")
       .then(function(res) { return res.json(); })
       .then(function(data) {
         masterData = data;
-        applyFormMode();
         populateDropdowns();
         addNewItemRow();
       })
       .catch(function(err) {
-        applyFormMode();
         addNewItemRow();
       });
 
     function populateDropdowns() {
       var cSelect = document.getElementById('clientSelect');
-      masterData.clients.forEach(function(c, i) {
-        var opt = document.createElement('option');
-        opt.value = i;
-        opt.textContent = c.name + " (" + (c.address.split(',')[0] || '') + ")";
-        cSelect.appendChild(opt);
-      });
+      if (masterData.clients) {
+        masterData.clients.forEach(function(c, i) {
+          var opt = document.createElement('option');
+          opt.value = i;
+          opt.textContent = c.name + " (" + (c.address.split(',')[0] || '') + ")";
+          cSelect.appendChild(opt);
+        });
+      }
 
       var vSelect = document.getElementById('vendorSelect');
-      masterData.vendors.forEach(function(v, i) {
-        var opt = document.createElement('option');
-        opt.value = i;
-        opt.textContent = v.name + (v.city ? " - " + v.city : "");
-        vSelect.appendChild(opt);
-      });
+      if (masterData.vendors) {
+        masterData.vendors.forEach(function(v, i) {
+          var opt = document.createElement('option');
+          opt.value = i;
+          opt.textContent = v.name + (v.city ? " - " + v.city : "");
+          vSelect.appendChild(opt);
+        });
+      }
     }
 
     function onClientChange() {
@@ -265,9 +276,11 @@
       var tr = document.createElement('tr');
 
       var itemSelectHtml = "<select class='row-item-sel' onchange='onRowItemSelect(this)'><option value=''>Custom / Pick</option>";
-      masterData.items.forEach(function(it, idx) {
-        itemSelectHtml += "<option value='" + idx + "'>" + it.name + "</option>";
-      });
+      if (masterData.items) {
+        masterData.items.forEach(function(it, idx) {
+          itemSelectHtml += "<option value='" + idx + "'>" + it.name + "</option>";
+        });
+      }
       itemSelectHtml += "</select><input type='text' class='row-item-name' placeholder='Item Name'>";
 
       if (currentMode === "DC") {
@@ -294,7 +307,7 @@
     function onRowItemSelect(sel) {
       var row = sel.closest('tr');
       var val = sel.value;
-      if (val !== "") {
+      if (val !== "" && masterData.items) {
         var it = masterData.items[parseInt(val, 10)];
         row.querySelector('.row-item-name').value = it.name;
         if (row.querySelector('.row-unit')) row.querySelector('.row-unit').value = it.unit;

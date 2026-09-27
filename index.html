@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Renewray Operations Desk</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 14px;
+      background: #f4f6f8;
+      color: #222;
+    }
+    .header-bar {
+      font-size: 16px;
+      font-weight: 700;
+      text-align: center;
+      padding: 12px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      margin-bottom: 12px;
+      color: #2481cc;
+    }
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #555;
+    }
+    input, select {
+      width: 100%;
+      padding: 9px 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    .table-container {
+      overflow-x: auto;
+      margin-bottom: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    th, td {
+      border: 1px solid #e0e0e0;
+      padding: 6px;
+      text-align: left;
+    }
+    th {
+      background: #f8f9fa;
+    }
+    .action-btn {
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn-add {
+      background: #e8f4fd;
+      color: #2481cc;
+      width: 100%;
+      margin-top: 4px;
+      padding: 10px;
+    }
+    .btn-del {
+      background: #fee;
+      color: #c00;
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      background: #2481cc;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .hidden { display: none; }
+    .status-msg {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-bar" id="formHeaderTitle">Loading Operations Form...</div>
+
+  <div id="mainFormContainer">
+    <div class="card">
+      <!-- Client Block (DC & BOM) -->
+      <div id="clientBlock">
+        <label>Client / Buyer Name:</label>
+        <select id="clientSelect" onchange="onClientChange()">
+          <option value="">-- Master Client Chunein --</option>
+        </select>
+        <input type="text" id="clientNameCustom" placeholder="Ya Naya Client Name type karein">
+
+        <label>Address / Site Location:</label>
+        <input type="text" id="clientAddress" placeholder="Full Address">
+
+        <div id="posWrapper">
+          <label>Place of Supply:</label>
+          <input type="text" id="placeOfSupply" value="Rajasthan">
+        </div>
+
+        <div id="bomMetaWrapper" class="hidden">
+          <label>Plant Capacity:</label>
+          <input type="text" id="plantCapacity" placeholder="e.g. 10 KW">
+          <label>Site Survey By:</label>
+          <input type="text" id="siteSurvey" placeholder="e.g. Site Engineer" value="Site Engineer">
+        </div>
+      </div>
+
+      <!-- Vendor Block (GRN) -->
+      <div id="vendorBlock" class="hidden">
+        <label>Vendor / Supplier Name:</label>
+        <select id="vendorSelect" onchange="onVendorChange()">
+          <option value="">-- Master Vendor Chunein --</option>
+        </select>
+        <input type="text" id="vendorNameCustom" placeholder="Ya Naya Vendor Name type karein">
+
+        <label>GSTIN:</label>
+        <input type="text" id="vendorGst" placeholder="Vendor GSTIN">
+
+        <label>Supplier Challan / Inv No:</label>
+        <input type="text" id="challanRef" placeholder="Challan / Invoice Reference">
+      </div>
+    </div>
+
+    <!-- Items Card -->
+    <div class="card">
+      <label>Items / Materials List:</label>
+      <div class="table-container">
+        <table id="itemsTable">
+          <thead id="itemsThead"></thead>
+          <tbody id="itemsTbody"></tbody>
+        </table>
+      </div>
+      <button type="button" class="action-btn btn-add" onclick="addNewItemRow()">➕ Add Another Item</button>
+    </div>
+
+    <button type="button" class="submit-btn" id="submitBtn" onclick="submitFormData()">Generate Document</button>
+  </div>
+
+  <div id="statusMsg" class="status-msg"></div>
+
+  <script>
+    var SCRIPT_ENDPOINT = "https://script.google.com/macros/s/AKfycbzcRCukDoJQWyERBD61i_MkEexI45ZTh6LGpLxawPtA9qxFXL9blQ9PJFLvhFDh31Yy/exec";
+
+    // URL parameters fetch karein
+    var urlParams = new URLSearchParams(window.location.search);
+    var currentMode = urlParams.get('mode') || "DC";
+    var userChatId = urlParams.get('chatId') || "";
+
+    var masterData = { clients: [], vendors: [], items: [] };
+
+    function applyFormMode() {
+      var titleDiv = document.getElementById('formHeaderTitle');
+      if (currentMode === "DC") {
+        titleDiv.textContent = "📄 Delivery Challan (DC)";
+        document.getElementById('clientBlock').classList.remove('hidden');
+        document.getElementById('posWrapper').classList.remove('hidden');
+        document.getElementById('bomMetaWrapper').classList.add('hidden');
+        document.getElementById('vendorBlock').classList.add('hidden');
+      } else if (currentMode === "GRN") {
+        titleDiv.textContent = "📥 Goods Receipt Note (GRN)";
+        document.getElementById('clientBlock').classList.add('hidden');
+        document.getElementById('vendorBlock').classList.remove('hidden');
+      } else if (currentMode === "BOM") {
+        titleDiv.textContent = "📋 BOM Requisition";
+        document.getElementById('clientBlock').classList.remove('hidden');
+        document.getElementById('posWrapper').classList.add('hidden');
+        document.getElementById('bomMetaWrapper').classList.remove('hidden');
+        document.getElementById('vendorBlock').classList.add('hidden');
+      }
+      renderItemsTableStructure();
+    }
+
+    // Master data fetch from Apps Script API
+    fetch(SCRIPT_ENDPOINT + "?action=getMasterData")
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        masterData = data;
+        applyFormMode();
+        populateDropdowns();
+        addNewItemRow();
+      })
+      .catch(function(err) {
+        applyFormMode();
+        addNewItemRow();
+      });
+
+    function populateDropdowns() {
+      var cSelect = document.getElementById('clientSelect');
+      masterData.clients.forEach(function(c, i) {
+        var opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = c.name + " (" + (c.address.split(',')[0] || '') + ")";
+        cSelect.appendChild(opt);
+      });
+
+      var vSelect = document.getElementById('vendorSelect');
+      masterData.vendors.forEach(function(v, i) {
+        var opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = v.name + (v.city ? " - " + v.city : "");
+        vSelect.appendChild(opt);
+      });
+    }
+
+    function onClientChange() {
+      var val = document.getElementById('clientSelect').value;
+      if (val !== "") {
+        var c = masterData.clients[parseInt(val, 10)];
+        document.getElementById('clientNameCustom').value = c.name;
+        document.getElementById('clientAddress').value = c.address;
+        document.getElementById('placeOfSupply').value = c.placeOfSupply || "Rajasthan";
+      }
+    }
+
+    function onVendorChange() {
+      var val = document.getElementById('vendorSelect').value;
+      if (val !== "") {
+        var v = masterData.vendors[parseInt(val, 10)];
+        document.getElementById('vendorNameCustom').value = v.name;
+        document.getElementById('vendorGst').value = v.gst;
+      }
+    }
+
+    function renderItemsTableStructure() {
+      var thead = document.getElementById('itemsThead');
+      if (currentMode === "DC") {
+        thead.innerHTML = "<tr><th>Item Name</th><th style='width:60px;'>Qty</th><th style='width:50px;'>Unit</th><th style='width:65px;'>HSN</th><th></th></tr>";
+      } else if (currentMode === "GRN") {
+        thead.innerHTML = "<tr><th>Item Name</th><th style='width:50px;'>Billed</th><th style='width:50px;'>Rcvd</th><th style='width:50px;'>Acc</th><th></th></tr>";
+      } else if (currentMode === "BOM") {
+        thead.innerHTML = "<tr><th>Material Description</th><th style='width:70px;'>Qty</th><th style='width:60px;'>Unit</th><th></th></tr>";
+      }
+    }
+
+    function addNewItemRow() {
+      var tbody = document.getElementById('itemsTbody');
+      var tr = document.createElement('tr');
+
+      var itemSelectHtml = "<select class='row-item-sel' onchange='onRowItemSelect(this)'><option value=''>Custom / Pick</option>";
+      masterData.items.forEach(function(it, idx) {
+        itemSelectHtml += "<option value='" + idx + "'>" + it.name + "</option>";
+      });
+      itemSelectHtml += "</select><input type='text' class='row-item-name' placeholder='Item Name'>";
+
+      if (currentMode === "DC") {
+        tr.innerHTML = "<td>" + itemSelectHtml + "</td>" +
+          "<td><input type='number' class='row-qty' value='1'></td>" +
+          "<td><input type='text' class='row-unit' value='Nos'></td>" +
+          "<td><input type='text' class='row-hsn' value='N/A'></td>" +
+          "<td><button type='button' class='action-btn btn-del' onclick='this.closest(\"tr\").remove()'>✕</button></td>";
+      } else if (currentMode === "GRN") {
+        tr.innerHTML = "<td>" + itemSelectHtml + "</td>" +
+          "<td><input type='number' class='row-billed' value='100'></td>" +
+          "<td><input type='number' class='row-rcvd' value='100'></td>" +
+          "<td><input type='number' class='row-acc' value='100'></td>" +
+          "<td><button type='button' class='action-btn btn-del' onclick='this.closest(\"tr\").remove()'>✕</button></td>";
+      } else if (currentMode === "BOM") {
+        tr.innerHTML = "<td>" + itemSelectHtml + "</td>" +
+          "<td><input type='number' class='row-qty' value='1'></td>" +
+          "<td><input type='text' class='row-unit' value='Nos'></td>" +
+          "<td><button type='button' class='action-btn btn-del' onclick='this.closest(\"tr\").remove()'>✕</button></td>";
+      }
+      tbody.appendChild(tr);
+    }
+
+    function onRowItemSelect(sel) {
+      var row = sel.closest('tr');
+      var val = sel.value;
+      if (val !== "") {
+        var it = masterData.items[parseInt(val, 10)];
+        row.querySelector('.row-item-name').value = it.name;
+        if (row.querySelector('.row-unit')) row.querySelector('.row-unit').value = it.unit;
+        if (row.querySelector('.row-hsn')) row.querySelector('.row-hsn').value = it.hsn;
+      }
+    }
+
+    function submitFormData() {
+      var submitBtn = document.getElementById('submitBtn');
+      var statusMsg = document.getElementById('statusMsg');
+
+      submitBtn.disabled = true;
+      statusMsg.innerHTML = "<span style='color:#2481cc; font-size:14px;'>⏳ Generating document, please wait...</span>";
+
+      var payload = {
+        mode: currentMode,
+        chatId: userChatId,
+        items: []
+      };
+
+      if (currentMode === "DC" || currentMode === "BOM") {
+        payload.clientName = document.getElementById('clientNameCustom').value.trim();
+        payload.clientAddress = document.getElementById('clientAddress').value.trim();
+        payload.placeOfSupply = document.getElementById('placeOfSupply').value.trim();
+        payload.plantCapacity = document.getElementById('plantCapacity').value.trim();
+        payload.siteSurvey = document.getElementById('siteSurvey').value.trim();
+        if (!payload.clientName) {
+          alert("Please enter Client Name!");
+          submitBtn.disabled = false;
+          statusMsg.innerHTML = "";
+          return;
+        }
+      } else if (currentMode === "GRN") {
+        payload.vendorName = document.getElementById('vendorNameCustom').value.trim();
+        payload.vendorGst = document.getElementById('vendorGst').value.trim();
+        payload.challanRef = document.getElementById('challanRef').value.trim();
+        if (!payload.vendorName) {
+          alert("Please enter Vendor Name!");
+          submitBtn.disabled = false;
+          statusMsg.innerHTML = "";
+          return;
+        }
+      }
+
+      var rows = document.querySelectorAll('#itemsTbody tr');
+      rows.forEach(function(r) {
+        var name = r.querySelector('.row-item-name').value.trim();
+        if (!name) return;
+
+        if (currentMode === "DC") {
+          payload.items.push({
+            name: name,
+            qty: r.querySelector('.row-qty').value,
+            unit: r.querySelector('.row-unit').value,
+            hsn: r.querySelector('.row-hsn').value
+          });
+        } else if (currentMode === "GRN") {
+          var b = r.querySelector('.row-billed').value;
+          var rc = r.querySelector('.row-rcvd').value;
+          var ac = r.querySelector('.row-acc').value;
+          payload.items.push({
+            name: name,
+            billedQty: b,
+            rcvdQty: rc,
+            acceptedQty: ac,
+            rejectedQty: Math.max(0, Number(rc) - Number(ac)),
+            remarks: "OK"
+          });
+        } else if (currentMode === "BOM") {
+          payload.items.push({
+            name: name,
+            qtyIssued: r.querySelector('.row-qty').value,
+            unit: r.querySelector('.row-unit').value,
+            remarks: ""
+          });
+        }
+      });
+
+      if (payload.items.length === 0) {
+        alert("Please add at least one item!");
+        submitBtn.disabled = false;
+        statusMsg.innerHTML = "";
+        return;
+      }
+
+      fetch(SCRIPT_ENDPOINT, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+      .then(function() {
+        document.getElementById('mainFormContainer').style.display = 'none';
+        statusMsg.innerHTML = `
+          <div style="background:#e8f5e9; border: 1px solid #81c784; padding:20px; border-radius:12px; margin-top:15px; color:#2e7d32; text-align:center;">
+            <div style="font-size:36px; margin-bottom:8px;">✅</div>
+            <b style="font-size:16px;">Document Submitted Successfully!</b><br>
+            <p style="font-size:13px; color:#555; margin-top:6px;">Document is generated and saved in Google Drive.</p>
+            <br>
+            <button onclick="location.reload()" style="padding:10px 18px; background:#2481cc; color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">➕ Create Another Entry</button>
+          </div>
+        `;
+      })
+      .catch(function(err) {
+        alert("Submission failed. Check network.");
+        submitBtn.disabled = false;
+        statusMsg.innerHTML = "";
+      });
+    }
+  </script>
+</body>
+</html>

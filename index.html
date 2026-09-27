@@ -369,6 +369,11 @@
         document.getElementById('clientNameCustom').value = c.name;
         document.getElementById('clientAddress').value = c.address;
         document.getElementById('placeOfSupply').value = c.placeOfSupply || "Rajasthan";
+      } else {
+        // Jab user wapas default "-- Master Client Chunein --" par click kare tab fields clear ho jayein
+        document.getElementById('clientNameCustom').value = "";
+        document.getElementById('clientAddress').value = "";
+        document.getElementById('placeOfSupply').value = "Rajasthan";
       }
     }
 
@@ -378,6 +383,10 @@
         var v = masterData.vendors[parseInt(val, 10)];
         document.getElementById('vendorNameCustom').value = v.name;
         document.getElementById('vendorGst').value = v.gst;
+      } else {
+        // Jab user wapas default "-- Master Vendor Chunein --" par click kare tab fields clear ho jayein
+        document.getElementById('vendorNameCustom').value = "";
+        document.getElementById('vendorGst').value = "";
       }
     }
 

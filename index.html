@@ -69,11 +69,11 @@
       margin-bottom: 10px;
       border: 1px solid var(--border);
       border-radius: 6px;
-      font-size: 14px; /* iOS zoom issue fix */
+      font-size: 14px;
       background: #fff;
     }
 
-    /* Add Item Layout (iOS Friendly Native Dropdown) */
+    /* Add Item Layout */
     .add-item-box {
       margin-bottom: 12px;
     }
@@ -192,9 +192,12 @@
       <div id="clientBlock">
         <label>Client / Buyer Name:</label>
         <select id="clientSelect" onchange="onClientChange()">
-          <option value="">-- Master Client Chunein --</option>
+          <option value="">-- Select Client from Master --</option>
+          <option value="__custom__">➕ Type Custom Client Name</option>
         </select>
-        <input type="text" id="clientNameCustom" placeholder="Ya Naya Client Name type karein">
+        <div id="customClientBox" class="hidden">
+          <input type="text" id="clientNameCustom" placeholder="Enter New Client Name">
+        </div>
 
         <label>Address / Site Location:</label>
         <input type="text" id="clientAddress" placeholder="Full Address">
@@ -216,9 +219,12 @@
       <div id="vendorBlock" class="hidden">
         <label>Vendor / Supplier Name:</label>
         <select id="vendorSelect" onchange="onVendorChange()">
-          <option value="">-- Master Vendor Chunein --</option>
+          <option value="">-- Select Vendor from Master --</option>
+          <option value="__custom__">➕ Type Custom Vendor Name</option>
         </select>
-        <input type="text" id="vendorNameCustom" placeholder="Ya Naya Vendor Name type karein">
+        <div id="customVendorBox" class="hidden">
+          <input type="text" id="vendorNameCustom" placeholder="Enter New Vendor Name">
+        </div>
 
         <label>GSTIN:</label>
         <input type="text" id="vendorGst" placeholder="Vendor GSTIN">
@@ -228,7 +234,7 @@
       </div>
     </div>
 
-    <!-- Items Section (Native iOS Picker Support) -->
+    <!-- Items Section -->
     <div class="card">
       <div class="add-item-box">
         <div class="card-title">Add Item</div>
@@ -242,7 +248,6 @@
           <button type="button" class="btn-add-submit" onclick="addPickedItemToList()">+ Add</button>
         </div>
 
-        <!-- Custom Item input if not in master list -->
         <div id="customItemInputBox" class="hidden">
           <input type="text" id="itemCustomNameInput" placeholder="Enter Custom Item Name here...">
         </div>
@@ -351,6 +356,56 @@
       }
     }
 
+    function onClientChange() {
+      var picker = document.getElementById('clientSelect');
+      var customBox = document.getElementById('customClientBox');
+      var customInput = document.getElementById('clientNameCustom');
+      var addrInput = document.getElementById('clientAddress');
+      var posInput = document.getElementById('placeOfSupply');
+
+      if (picker.value === "__custom__") {
+        customBox.classList.remove('hidden');
+        customInput.value = "";
+        addrInput.value = "";
+        posInput.value = "Rajasthan";
+        customInput.focus();
+      } else if (picker.value !== "") {
+        customBox.classList.add('hidden');
+        var c = masterData.clients[parseInt(picker.value, 10)];
+        customInput.value = c.name;
+        addrInput.value = c.address;
+        posInput.value = c.placeOfSupply || "Rajasthan";
+      } else {
+        customBox.classList.add('hidden');
+        customInput.value = "";
+        addrInput.value = "";
+        posInput.value = "Rajasthan";
+      }
+    }
+
+    function onVendorChange() {
+      var picker = document.getElementById('vendorSelect');
+      var customBox = document.getElementById('customVendorBox');
+      var customInput = document.getElementById('vendorNameCustom');
+      var gstInput = document.getElementById('vendorGst');
+
+      if (picker.value === "__custom__") {
+        customBox.classList.remove('hidden');
+        customInput.value = "";
+        gstInput.value = "";
+        customInput.focus();
+      } else if (picker.value !== "") {
+        customBox.classList.add('hidden');
+        var v = masterData.vendors[parseInt(picker.value, 10)];
+        customInput.value = v.name;
+        gstInput.value = v.gst;
+      } else {
+        customBox.classList.add('hidden');
+        customInput.value = "";
+        gstInput.value = "";
+      }
+    }
+
     function onItemPickerChange() {
       var picker = document.getElementById('itemSelectPicker');
       var customBox = document.getElementById('customItemInputBox');
@@ -359,34 +414,6 @@
         document.getElementById('itemCustomNameInput').focus();
       } else {
         customBox.classList.add('hidden');
-      }
-    }
-
-    function onClientChange() {
-      var val = document.getElementById('clientSelect').value;
-      if (val !== "") {
-        var c = masterData.clients[parseInt(val, 10)];
-        document.getElementById('clientNameCustom').value = c.name;
-        document.getElementById('clientAddress').value = c.address;
-        document.getElementById('placeOfSupply').value = c.placeOfSupply || "Rajasthan";
-      } else {
-        // Jab user wapas default "-- Master Client Chunein --" par click kare tab fields clear ho jayein
-        document.getElementById('clientNameCustom').value = "";
-        document.getElementById('clientAddress').value = "";
-        document.getElementById('placeOfSupply').value = "Rajasthan";
-      }
-    }
-
-    function onVendorChange() {
-      var val = document.getElementById('vendorSelect').value;
-      if (val !== "") {
-        var v = masterData.vendors[parseInt(val, 10)];
-        document.getElementById('vendorNameCustom').value = v.name;
-        document.getElementById('vendorGst').value = v.gst;
-      } else {
-        // Jab user wapas default "-- Master Vendor Chunein --" par click kare tab fields clear ho jayein
-        document.getElementById('vendorNameCustom').value = "";
-        document.getElementById('vendorGst').value = "";
       }
     }
 
@@ -428,7 +455,6 @@
         acceptedQty: qtyVal
       });
 
-      // Reset selection cleanly so iPhone can pick next item immediately
       picker.value = "";
       customNameInput.value = "";
       document.getElementById('customItemInputBox').classList.add('hidden');

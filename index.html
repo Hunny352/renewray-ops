@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Renewray Operations Desk</title>
   <style>
     :root {
@@ -25,9 +25,9 @@
       padding: 14px;
       max-width: 650px;
       margin: 0 auto;
+      -webkit-text-size-adjust: 100%;
     }
 
-    /* Single Header (No other options/tabs) */
     .header-title {
       font-size: 17px;
       font-weight: 700;
@@ -65,15 +65,15 @@
 
     input, select {
       width: 100%;
-      padding: 9px 10px;
+      padding: 10px;
       margin-bottom: 10px;
       border: 1px solid var(--border);
       border-radius: 6px;
-      font-size: 13px;
+      font-size: 14px; /* iOS zoom issue fix */
       background: #fff;
     }
 
-    /* Add Item Layout */
+    /* Add Item Layout (iOS Friendly Native Dropdown) */
     .add-item-box {
       margin-bottom: 12px;
     }
@@ -81,8 +81,9 @@
       display: flex;
       gap: 8px;
       align-items: center;
+      margin-bottom: 8px;
     }
-    .input-search-item {
+    .select-item-dropdown {
       flex: 1;
       margin-bottom: 0 !important;
     }
@@ -92,7 +93,7 @@
       text-align: center;
     }
     .btn-add-submit {
-      padding: 8px 16px;
+      padding: 0 16px;
       background: var(--primary);
       color: #fff;
       font-weight: 700;
@@ -101,7 +102,7 @@
       border-radius: 6px;
       cursor: pointer;
       white-space: nowrap;
-      height: 36px;
+      height: 40px;
     }
     .btn-add-submit:hover {
       background: var(--primary-hover);
@@ -180,7 +181,6 @@
 </head>
 <body>
 
-  <!-- Dynamic Header: Shows ONLY the current mode -->
   <div class="header-title" id="formHeaderTitle">Loading Form...</div>
 
   <div id="mainFormContainer">
@@ -228,16 +228,23 @@
       </div>
     </div>
 
-    <!-- Items Section -->
+    <!-- Items Section (Native iOS Picker Support) -->
     <div class="card">
       <div class="add-item-box">
         <div class="card-title">Add Item</div>
         <div class="add-item-row">
-          <input list="itemsDataList" id="itemSearchInput" class="input-search-item" placeholder="Type to search item...">
-          <datalist id="itemsDataList"></datalist>
+          <select id="itemSelectPicker" class="select-item-dropdown" onchange="onItemPickerChange()">
+            <option value="">-- Select Item from Master --</option>
+            <option value="__custom__">➕ Type Custom Item Name</option>
+          </select>
 
           <input type="number" id="itemQtyInput" class="input-qty-item" value="1" min="1" placeholder="Qty">
           <button type="button" class="btn-add-submit" onclick="addPickedItemToList()">+ Add</button>
+        </div>
+
+        <!-- Custom Item input if not in master list -->
+        <div id="customItemInputBox" class="hidden">
+          <input type="text" id="itemCustomNameInput" placeholder="Enter Custom Item Name here...">
         </div>
       </div>
 
@@ -248,7 +255,7 @@
             <thead id="itemsThead"></thead>
             <tbody id="itemsTbody">
               <tr>
-                <td colspan="5" class="empty-state">No items added yet - search above and tap + Add.</td>
+                <td colspan="5" class="empty-state">No items added yet - select above and tap + Add.</td>
               </tr>
             </tbody>
           </table>
@@ -264,7 +271,6 @@
   <script>
     var SCRIPT_ENDPOINT = "https://script.google.com/macros/s/AKfycbzcRCukDoJQWyERBD61i_MkEexI45ZTh6LGpLxawPtA9qxFXL9blQ9PJFLvhFDh31Yy/exec";
 
-    // Auto case-insensitive check
     var urlParams = new URLSearchParams(window.location.search);
     var rawMode = (urlParams.get('mode') || "DC").toString().trim().toUpperCase();
     var currentMode = (rawMode === "GRN" || rawMode === "BOM") ? rawMode : "DC";
@@ -334,14 +340,25 @@
         });
       }
 
-      var dList = document.getElementById('itemsDataList');
-      dList.innerHTML = "";
+      var itemPicker = document.getElementById('itemSelectPicker');
       if (masterData.items) {
-        masterData.items.forEach(function(it) {
+        masterData.items.forEach(function(it, i) {
           var opt = document.createElement('option');
-          opt.value = it.name;
-          dList.appendChild(opt);
+          opt.value = i;
+          opt.textContent = it.name;
+          itemPicker.appendChild(opt);
         });
+      }
+    }
+
+    function onItemPickerChange() {
+      var picker = document.getElementById('itemSelectPicker');
+      var customBox = document.getElementById('customItemInputBox');
+      if (picker.value === "__custom__") {
+        customBox.classList.remove('hidden');
+        document.getElementById('itemCustomNameInput').focus();
+      } else {
+        customBox.classList.add('hidden');
       }
     }
 
@@ -365,31 +382,35 @@
     }
 
     function addPickedItemToList() {
-      var nameInput = document.getElementById('itemSearchInput');
+      var picker = document.getElementById('itemSelectPicker');
+      var customNameInput = document.getElementById('itemCustomNameInput');
       var qtyInput = document.getElementById('itemQtyInput');
 
-      var nameVal = nameInput.value.trim();
-      var qtyVal = Number(qtyInput.value) || 1;
-
-      if (!nameVal) {
-        alert("Please enter or select an item name!");
-        return;
-      }
-
+      var chosenVal = picker.value;
+      var itemName = "";
       var hsn = "N/A";
       var unit = "Nos";
-      if (masterData.items) {
-        var found = masterData.items.find(function(it) {
-          return it.name.toLowerCase() === nameVal.toLowerCase();
-        });
-        if (found) {
-          hsn = found.hsn || "N/A";
-          unit = found.unit || "Nos";
+
+      if (chosenVal === "__custom__") {
+        itemName = customNameInput.value.trim();
+      } else if (chosenVal !== "") {
+        var it = masterData.items[parseInt(chosenVal, 10)];
+        if (it) {
+          itemName = it.name;
+          hsn = it.hsn || "N/A";
+          unit = it.unit || "Nos";
         }
       }
 
+      if (!itemName) {
+        alert("Please select an item or type custom item name!");
+        return;
+      }
+
+      var qtyVal = Number(qtyInput.value) || 1;
+
       selectedItemsArray.push({
-        name: nameVal,
+        name: itemName,
         qty: qtyVal,
         hsn: hsn,
         unit: unit,
@@ -398,8 +419,12 @@
         acceptedQty: qtyVal
       });
 
-      nameInput.value = "";
+      // Reset selection cleanly so iPhone can pick next item immediately
+      picker.value = "";
+      customNameInput.value = "";
+      document.getElementById('customItemInputBox').classList.add('hidden');
       qtyInput.value = "1";
+
       renderSelectedItemsTable();
     }
 
@@ -412,7 +437,7 @@
       var tbody = document.getElementById('itemsTbody');
 
       if (selectedItemsArray.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No items added yet - search above and tap + Add.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No items added yet - select above and tap + Add.</td></tr>';
         return;
       }
 

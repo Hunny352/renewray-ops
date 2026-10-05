@@ -202,7 +202,28 @@
     }
 
     // Page load hote hi data fetch karna shuru karein
-    window.onload = loadData;
+// Page load hote hi URL se mode check karein aur data fetch karein
+    window.onload = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      // 'mode' ya 'type' dono me se koi bhi parameter chalega
+      let typeParam = urlParams.get('mode') || urlParams.get('type');
+      
+      if (typeParam) {
+        let selectParam = typeParam.toUpperCase();
+        let docTypeDropdown = document.getElementById('docType');
+        
+        // Check karein ki kya dropdown mein ye option exist karta hai
+        for (let i = 0; i < docTypeDropdown.options.length; i++) {
+          if (docTypeDropdown.options[i].value === selectParam) {
+            docTypeDropdown.value = selectParam;
+            break;
+          }
+        }
+      }
+      
+      // End mein data load karne ka function call karein
+      loadData();
+    };
   </script>
 </body>
 </html>

@@ -1,611 +1,208 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Renewray Operations Desk</title>
+  <title>Renewray ERP</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1a73e8">
   <style>
-    :root {
-      --primary: #1976d2;
-      --primary-hover: #1565c0;
-      --bg: #f8fafc;
-      --card: #ffffff;
-      --border: #d0d7de;
-      --text: #24292f;
-      --muted: #57606a;
-      --danger: #cf222e;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      padding: 14px;
-      max-width: 650px;
-      margin: 0 auto;
-      -webkit-text-size-adjust: 100%;
-    }
-
-    .header-title {
-      font-size: 17px;
-      font-weight: 700;
-      text-align: center;
-      padding: 12px;
-      background: var(--card);
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      margin-bottom: 12px;
-      color: var(--primary);
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: 8px;
-      padding: 14px;
-      border: 1px solid var(--border);
-      margin-bottom: 12px;
-    }
-
-    .card-title {
-      font-size: 13px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: var(--text);
-    }
-
-    label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      margin-bottom: 4px;
-      color: var(--muted);
-    }
-
-    input, select {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 14px;
-      background: #fff;
-    }
-
-    /* Add Item Layout */
-    .add-item-box {
-      margin-bottom: 12px;
-    }
-    .add-item-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-    .select-item-dropdown {
-      flex: 1;
-      margin-bottom: 0 !important;
-    }
-    .input-qty-item {
-      width: 75px !important;
-      margin-bottom: 0 !important;
-      text-align: center;
-    }
-    .btn-add-submit {
-      padding: 0 16px;
-      background: var(--primary);
-      color: #fff;
-      font-weight: 700;
-      font-size: 13px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      white-space: nowrap;
-      height: 40px;
-    }
-    .btn-add-submit:hover {
-      background: var(--primary-hover);
-    }
-
-    /* Selected Items Table */
-    .selected-items-wrapper {
-      margin-top: 10px;
-    }
-    .table-responsive {
-      overflow-x: auto;
-      border: 1px solid #e1e4e8;
-      border-radius: 6px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-      text-align: left;
-    }
-    th {
-      background: #f6f8fa;
-      color: var(--text);
-      font-weight: 600;
-      padding: 8px 10px;
-      border-bottom: 1px solid #e1e4e8;
-    }
-    td {
-      padding: 8px 10px;
-      border-bottom: 1px solid #eaecef;
-      vertical-align: middle;
-    }
-    tr:last-child td {
-      border-bottom: none;
-    }
-    .empty-state {
-      padding: 14px 10px;
-      color: #8c959f;
-      text-align: center;
-    }
-
-    .btn-remove-row {
-      background: transparent;
-      border: none;
-      color: var(--danger);
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      padding: 2px 6px;
-    }
-
-    .submit-button {
-      width: 100%;
-      padding: 13px;
-      font-size: 15px;
-      font-weight: 700;
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-top: 6px;
-    }
-    .submit-button:disabled {
-      background: #94a3b8;
-    }
-
-    .hidden { display: none !important; }
-    .status-msg {
-      text-align: center;
-      font-size: 13px;
-      font-weight: 600;
-      margin-top: 10px;
-    }
+    body { font-family: Arial, sans-serif; padding: 15px; margin: 0; background-color: #f8f9fa; }
+    .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 15px; }
+    label { font-weight: bold; display: block; margin-top: 10px; font-size: 13px; color: #333; }
+    select, input { width: 100%; padding: 10px; margin-top: 5px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+    button { width: 100%; padding: 14px; background: #1a73e8; color: #fff; border: none; margin-top: 15px; cursor: pointer; font-weight: bold; border-radius: 6px; font-size: 15px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #eee; padding: 8px; text-align: left; font-size: 13px; }
+    .header-bar { background: #1a73e8; color: white; padding: 15px; text-align: center; font-size: 18px; font-weight: bold; border-radius: 8px 8px 0 0; margin: -15px -15px 15px -15px; }
+    .loader { display: none; text-align: center; margin-top: 20px; font-weight: bold; color: #1a73e8; }
   </style>
 </head>
 <body>
 
-  <div class="header-title" id="formHeaderTitle">Loading Form...</div>
-
-  <div id="mainFormContainer">
-    <!-- Party Block -->
-    <div class="card">
-      <div class="card-title" id="partyBlockTitle">Party Information</div>
-      
-      <!-- DC & BOM Party Section -->
-      <div id="clientBlock">
-        <label>Client / Buyer Name:</label>
-        <select id="clientSelect" onchange="onClientChange()">
-          <option value="">-- Select Client from Master --</option>
-          <option value="__custom__">➕ Type Custom Client Name</option>
-        </select>
-        <div id="customClientBox" class="hidden">
-          <input type="text" id="clientNameCustom" placeholder="Enter New Client Name">
-        </div>
-
-        <label>Address / Site Location:</label>
-        <input type="text" id="clientAddress" placeholder="Full Address">
-
-        <div id="posWrapper">
-          <label>Place of Supply:</label>
-          <input type="text" id="placeOfSupply" value="Rajasthan">
-        </div>
-
-        <div id="bomMetaWrapper" class="hidden">
-          <label>Plant Capacity:</label>
-          <input type="text" id="plantCapacity" placeholder="e.g. 10 KW">
-          <label>Site Survey By:</label>
-          <input type="text" id="siteSurvey" placeholder="e.g. Site Engineer" value="Site Engineer">
-        </div>
-      </div>
-
-      <!-- GRN Vendor Section -->
-      <div id="vendorBlock" class="hidden">
-        <label>Vendor / Supplier Name:</label>
-        <select id="vendorSelect" onchange="onVendorChange()">
-          <option value="">-- Select Vendor from Master --</option>
-          <option value="__custom__">➕ Type Custom Vendor Name</option>
-        </select>
-        <div id="customVendorBox" class="hidden">
-          <input type="text" id="vendorNameCustom" placeholder="Enter New Vendor Name">
-        </div>
-
-        <label>GSTIN:</label>
-        <input type="text" id="vendorGst" placeholder="Vendor GSTIN">
-
-        <label>Supplier Challan / Inv No:</label>
-        <input type="text" id="challanRef" placeholder="Challan / Invoice Reference">
-      </div>
-    </div>
-
-    <!-- Items Section -->
-    <div class="card">
-      <div class="add-item-box">
-        <div class="card-title">Add Item</div>
-        <div class="add-item-row">
-          <select id="itemSelectPicker" class="select-item-dropdown" onchange="onItemPickerChange()">
-            <option value="">-- Select Item from Master --</option>
-            <option value="__custom__">➕ Type Custom Item Name</option>
-          </select>
-
-          <input type="number" id="itemQtyInput" class="input-qty-item" value="1" min="1" placeholder="Qty">
-          <button type="button" class="btn-add-submit" onclick="addPickedItemToList()">+ Add</button>
-        </div>
-
-        <div id="customItemInputBox" class="hidden">
-          <input type="text" id="itemCustomNameInput" placeholder="Enter Custom Item Name here...">
-        </div>
-      </div>
-
-      <div class="selected-items-wrapper">
-        <div class="card-title">Selected Items</div>
-        <div class="table-responsive">
-          <table id="selectedItemsTable">
-            <thead id="itemsThead"></thead>
-            <tbody id="itemsTbody">
-              <tr>
-                <td colspan="5" class="empty-state">No items added yet - select above and tap + Add.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <button type="button" class="submit-button" id="submitBtn" onclick="submitFormData()">Generate Document</button>
+  <div class="card">
+    <div class="header-bar">Renewray ERP</div>
+    
+    <label>Document Type</label>
+    <select id="docType" onchange="loadData()">
+      <option value="DC">Delivery Challan (DC)</option>
+      <option value="PO">Purchase Order (PO)</option>
+      <option value="GRN">Goods Receipt Note (GRN)</option>
+      <option value="BOM">BOM Requisition</option>
+    </select>
   </div>
 
-  <div id="statusMsg" class="status-msg"></div>
+  <div id="loader" class="loader">Loading Master Data...</div>
+
+  <div id="formContent" class="card" style="display:none;">
+    
+    <!-- 🔥 NEW: Warehouse Dropdown -->
+    <label>Select Warehouse (For Stock)</label>
+    <select id="warehouse" style="border-color:#34a853; border-width:2px;"></select>
+
+    <label id="partyLabel" style="margin-top:15px;">Select Party</label>
+    <select id="party"></select>
+    
+    <div style="display:flex;gap:10px;margin-top:10px;">
+      <div style="flex:1"><label>Date</label><input type="date" id="date"></div>
+      <div style="flex:1"><label>Remarks/Terms</label><input type="text" id="terms" placeholder="Terms"></div>
+    </div>
+    <hr style="margin:15px 0; border:0; border-top:1px solid #eee;">
+    
+    <div style="display:flex;gap:10px;align-items:flex-end;">
+      <div style="flex:2"><label>Item</label><select id="item"></select></div>
+      <div style="flex:1"><label>Qty</label><input type="number" id="qty" value="1" min="1"></div>
+      <div style="flex:1"><button type="button" onclick="add()" style="margin:0;background:#34a853;padding:10px;">+ Add</button></div>
+    </div>
+    
+    <table><thead><tr><th>Item</th><th>Qty</th><th>Del</th></tr></thead><tbody id="tbody"></tbody></table>
+    
+    <button id="btn" onclick="submit()">Generate Document</button>
+    <div id="msg" style="margin-top:10px;text-align:center;font-weight:bold;"></div>
+  </div>
 
   <script>
-    var SCRIPT_ENDPOINT = "https://script.google.com/macros/s/AKfycbzcRCukDoJQWyERBD61i_MkEexI45ZTh6LGpLxawPtA9qxFXL9blQ9PJFLvhFDh31Yy/exec";
+    // 🚨 YAHAN APNA GOOGLE SCRIPT WEB APP URL PASTE KAREIN
+    const API_URL = "https://script.google.com/macros/s/AKfycbzcRCukDoJQWyERBD61i_MkEexI45ZTh6LGpLxawPtA9qxFXL9blQ9PJFLvhFDh31Yy/exec"; 
+    
+    let PARTIES = [], ITEMS = [], WAREHOUSES = [], SEL = [];
 
-    var urlParams = new URLSearchParams(window.location.search);
-    var rawMode = (urlParams.get('mode') || "DC").toString().trim().toUpperCase();
-    var currentMode = (rawMode === "GRN" || rawMode === "BOM") ? rawMode : "DC";
-
-    var userChatId = urlParams.get('chatId') || "";
-    var masterData = { clients: [], vendors: [], items: [] };
-    var selectedItemsArray = [];
-
-    function setupPageMode() {
-      var titleDiv = document.getElementById('formHeaderTitle');
-      var clientBlock = document.getElementById('clientBlock');
-      var vendorBlock = document.getElementById('vendorBlock');
-      var posWrapper = document.getElementById('posWrapper');
-      var bomMetaWrapper = document.getElementById('bomMetaWrapper');
-      var thead = document.getElementById('itemsThead');
-
-      if (currentMode === "DC") {
-        titleDiv.textContent = "📄 Delivery Challan (DC)";
-        clientBlock.classList.remove('hidden');
-        vendorBlock.classList.add('hidden');
-        posWrapper.classList.remove('hidden');
-        bomMetaWrapper.classList.add('hidden');
-        thead.innerHTML = "<tr><th>Item</th><th style='width:65px;'>HSN</th><th style='width:55px;'>Qty</th><th style='width:50px;'>Unit</th><th style='width:30px;'></th></tr>";
-      } else if (currentMode === "GRN") {
-        titleDiv.textContent = "📥 Goods Receipt Note (GRN)";
-        clientBlock.classList.add('hidden');
-        vendorBlock.classList.remove('hidden');
-        thead.innerHTML = "<tr><th>Item</th><th style='width:55px;'>Billed</th><th style='width:55px;'>Rcvd</th><th style='width:55px;'>Acc</th><th style='width:30px;'></th></tr>";
-      } else if (currentMode === "BOM") {
-        titleDiv.textContent = "📋 BOM Material Requisition";
-        clientBlock.classList.remove('hidden');
-        vendorBlock.classList.add('hidden');
-        posWrapper.classList.add('hidden');
-        bomMetaWrapper.classList.remove('hidden');
-        thead.innerHTML = "<tr><th>Material Description</th><th style='width:70px;'>Qty</th><th style='width:60px;'>Unit</th><th style='width:30px;'></th></tr>";
-      }
+    // Service Worker Registration for PWA (Mobile App Feature)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(err => console.log(err));
     }
 
-    setupPageMode();
+    function loadData() {
+      document.getElementById('loader').style.display = 'block';
+      document.getElementById('formContent').style.display = 'none';
+      
+      let type = document.getElementById('docType').value;
+      document.getElementById('partyLabel').innerText = (type === 'DC' || type === 'BOM') ? 'Select Client / Buyer' : 'Select Supplier / Vendor';
+      
+      // Backend (API) se Master Data manga rahe hain
+      fetch(API_URL + "?action=getMasterData")
+        .then(res => res.json())
+        .then(data => {
+          PARTIES = (type === 'DC' || type === 'BOM') ? data.clients : data.vendors;
+          ITEMS = data.items; 
+          WAREHOUSES = data.warehouses || ["Main Warehouse"]; // 🔥 Warehouse data load kiya
 
-    fetch(SCRIPT_ENDPOINT + "?action=getMasterData")
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        masterData = data;
-        populateDropdowns();
-      })
-      .catch(function(err) {});
+          // Aaj ki date set karein
+          let today = new Date().toISOString().split('T')[0];
+          document.getElementById('date').value = today;
+          
+          // Warehouse Dropdown bharein
+          let wsel = document.getElementById('warehouse');
+          wsel.innerHTML = '';
+          WAREHOUSES.forEach(w => wsel.innerHTML += `<option value="${w}">${w}</option>`);
 
-    function populateDropdowns() {
-      var cSelect = document.getElementById('clientSelect');
-      if (masterData.clients) {
-        masterData.clients.forEach(function(c, i) {
-          var opt = document.createElement('option');
-          opt.value = i;
-          opt.textContent = c.name + " (" + (c.address.split(',')[0] || '') + ")";
-          cSelect.appendChild(opt);
+          // Party Dropdown bharein
+          let psel = document.getElementById('party');
+          psel.innerHTML = '<option value="">-- Select --</option>';
+          PARTIES.forEach((p,i) => psel.innerHTML += `<option value="${i}">${p.name}</option>`);
+          
+          // Item Dropdown bharein
+          let isel = document.getElementById('item');
+          isel.innerHTML = '<option value="">-- Select Product --</option>';
+          ITEMS.forEach((it,i) => isel.innerHTML += `<option value="${i}">${it.name}</option>`);
+          
+          document.getElementById('loader').style.display = 'none';
+          document.getElementById('formContent').style.display = 'block';
+          SEL = []; render();
+        }).catch(err => {
+          alert("Error loading data. Please check your connection or API URL.");
+          document.getElementById('loader').innerText = "Failed to load data.";
         });
-      }
-
-      var vSelect = document.getElementById('vendorSelect');
-      if (masterData.vendors) {
-        masterData.vendors.forEach(function(v, i) {
-          var opt = document.createElement('option');
-          opt.value = i;
-          opt.textContent = v.name + (v.city ? " - " + v.city : "");
-          vSelect.appendChild(opt);
-        });
-      }
-
-      var itemPicker = document.getElementById('itemSelectPicker');
-      if (masterData.items) {
-        masterData.items.forEach(function(it, i) {
-          var opt = document.createElement('option');
-          opt.value = i;
-          opt.textContent = it.name;
-          itemPicker.appendChild(opt);
-        });
-      }
     }
 
-    function onClientChange() {
-      var picker = document.getElementById('clientSelect');
-      var customBox = document.getElementById('customClientBox');
-      var customInput = document.getElementById('clientNameCustom');
-      var addrInput = document.getElementById('clientAddress');
-      var posInput = document.getElementById('placeOfSupply');
-
-      if (picker.value === "__custom__") {
-        customBox.classList.remove('hidden');
-        customInput.value = "";
-        addrInput.value = "";
-        posInput.value = "Rajasthan";
-        customInput.focus();
-      } else if (picker.value !== "") {
-        customBox.classList.add('hidden');
-        var c = masterData.clients[parseInt(picker.value, 10)];
-        customInput.value = c.name;
-        addrInput.value = c.address;
-        posInput.value = c.placeOfSupply || "Rajasthan";
-      } else {
-        customBox.classList.add('hidden');
-        customInput.value = "";
-        addrInput.value = "";
-        posInput.value = "Rajasthan";
-      }
-    }
-
-    function onVendorChange() {
-      var picker = document.getElementById('vendorSelect');
-      var customBox = document.getElementById('customVendorBox');
-      var customInput = document.getElementById('vendorNameCustom');
-      var gstInput = document.getElementById('vendorGst');
-
-      if (picker.value === "__custom__") {
-        customBox.classList.remove('hidden');
-        customInput.value = "";
-        gstInput.value = "";
-        customInput.focus();
-      } else if (picker.value !== "") {
-        customBox.classList.add('hidden');
-        var v = masterData.vendors[parseInt(picker.value, 10)];
-        customInput.value = v.name;
-        gstInput.value = v.gst;
-      } else {
-        customBox.classList.add('hidden');
-        customInput.value = "";
-        gstInput.value = "";
-      }
-    }
-
-    function onItemPickerChange() {
-      var picker = document.getElementById('itemSelectPicker');
-      var customBox = document.getElementById('customItemInputBox');
-      if (picker.value === "__custom__") {
-        customBox.classList.remove('hidden');
-        document.getElementById('itemCustomNameInput').focus();
-      } else {
-        customBox.classList.add('hidden');
-      }
-    }
-
-    function addPickedItemToList() {
-      var picker = document.getElementById('itemSelectPicker');
-      var customNameInput = document.getElementById('itemCustomNameInput');
-      var qtyInput = document.getElementById('itemQtyInput');
-
-      var chosenVal = picker.value;
-      var itemName = "";
-      var hsn = "N/A";
-      var unit = "Nos";
-
-      if (chosenVal === "__custom__") {
-        itemName = customNameInput.value.trim();
-      } else if (chosenVal !== "") {
-        var it = masterData.items[parseInt(chosenVal, 10)];
-        if (it) {
-          itemName = it.name;
-          hsn = it.hsn || "N/A";
-          unit = it.unit || "Nos";
-        }
-      }
-
-      if (!itemName) {
-        alert("Please select an item or type custom item name!");
-        return;
-      }
-
-      var qtyVal = Number(qtyInput.value) || 1;
-
-      selectedItemsArray.push({
-        name: itemName,
-        qty: qtyVal,
-        hsn: hsn,
-        unit: unit,
-        billedQty: qtyVal,
-        rcvdQty: qtyVal,
-        acceptedQty: qtyVal
+    function add() {
+      let idx = document.getElementById('item').value, q = document.getElementById('qty').value;
+      if(!idx || q < 1) return;
+      
+      // Naya item frontend ki list mein jodein (Backend par baad mein jayega)
+      SEL.push({
+        name: ITEMS[idx].name, 
+        hsn: ITEMS[idx].hsn, 
+        unit: ITEMS[idx].unit, 
+        qty: q, 
+        qtyIssued: q,       // BOM ke liye
+        billedQty: q,       // GRN ke liye
+        rcvdQty: q,         // GRN ke liye
+        acceptedQty: q      // GRN ke liye
       });
-
-      picker.value = "";
-      customNameInput.value = "";
-      document.getElementById('customItemInputBox').classList.add('hidden');
-      qtyInput.value = "1";
-
-      renderSelectedItemsTable();
+      render();
+    }
+    
+    function rem(i) { SEL.splice(i,1); render(); }
+    
+    function render() {
+      let b = document.getElementById('tbody');
+      if(!SEL.length) { b.innerHTML = '<tr><td colspan="3" align="center">No items added.</td></tr>'; return; }
+      b.innerHTML = SEL.map((s,i) => `<tr><td>${s.name}</td><td>${s.qty}</td><td style="text-align:center;"><button onclick="rem(${i})" style="margin:0;padding:5px;background:red;">X</button></td></tr>`).join('');
     }
 
-    function removeSelectedItem(idx) {
-      selectedItemsArray.splice(idx, 1);
-      renderSelectedItemsTable();
-    }
+    function submit() {
+      let pidx = document.getElementById('party').value;
+      let btn = document.getElementById('btn'); 
+      let msg = document.getElementById('msg');
+      let docMode = document.getElementById('docType').value;
 
-    function renderSelectedItemsTable() {
-      var tbody = document.getElementById('itemsTbody');
-
-      if (selectedItemsArray.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No items added yet - select above and tap + Add.</td></tr>';
-        return;
+      if(!pidx || !SEL.length) { 
+        msg.innerText = "Please select a party and add at least one item!"; 
+        msg.style.color = "red"; 
+        return; 
       }
+      
+      let selectedParty = PARTIES[pidx];
 
-      var html = "";
-      selectedItemsArray.forEach(function(item, idx) {
-        if (currentMode === "DC") {
-          html += `
-            <tr>
-              <td><b>${item.name}</b></td>
-              <td>${item.hsn}</td>
-              <td>${item.qty}</td>
-              <td>${item.unit}</td>
-              <td><button type="button" class="btn-remove-row" onclick="removeSelectedItem(${idx})">✕</button></td>
-            </tr>
-          `;
-        } else if (currentMode === "GRN") {
-          html += `
-            <tr>
-              <td><b>${item.name}</b></td>
-              <td>${item.billedQty}</td>
-              <td>${item.rcvdQty}</td>
-              <td>${item.acceptedQty}</td>
-              <td><button type="button" class="btn-remove-row" onclick="removeSelectedItem(${idx})">✕</button></td>
-            </tr>
-          `;
-        } else if (currentMode === "BOM") {
-          html += `
-            <tr>
-              <td><b>${item.name}</b></td>
-              <td>${item.qty}</td>
-              <td>${item.unit}</td>
-              <td><button type="button" class="btn-remove-row" onclick="removeSelectedItem(${idx})">✕</button></td>
-            </tr>
-          `;
-        }
-      });
-
-      tbody.innerHTML = html;
-    }
-
-    function submitFormData() {
-      var submitBtn = document.getElementById('submitBtn');
-      var statusMsg = document.getElementById('statusMsg');
-
-      if (selectedItemsArray.length === 0) {
-        alert("Please add at least one item using '+ Add' button!");
-        return;
-      }
-
-      submitBtn.disabled = true;
-      statusMsg.innerHTML = "<span style='color:var(--primary); font-size:14px;'>⏳ Generating document, please wait...</span>";
-
-      var payload = {
-        mode: currentMode,
-        chatId: userChatId,
-        items: []
+      // Payload taiyaar karein (Backend ko bhejne ke liye)
+      let payload = {
+        mode: docMode,
+        warehouse: document.getElementById('warehouse').value, // 🔥 Warehouse Bheja
+        paymentTerms: document.getElementById('terms').value, 
+        dateIso: document.getElementById('date').value,
+        items: SEL,
+        // Telegram notification bhejne ke liye (Agar group me chahiye toh Chat ID daalein)
+        chatId: "" // e.g., "-1001234567890" (optional)
       };
 
-      if (currentMode === "DC" || currentMode === "BOM") {
-        payload.clientName = document.getElementById('clientNameCustom').value.trim();
-        payload.clientAddress = document.getElementById('clientAddress').value.trim();
-        payload.placeOfSupply = document.getElementById('placeOfSupply').value.trim();
-        payload.plantCapacity = document.getElementById('plantCapacity').value.trim();
-        payload.siteSurvey = document.getElementById('siteSurvey').value.trim();
-        if (!payload.clientName) {
-          alert("Please enter Client Name!");
-          submitBtn.disabled = false;
-          statusMsg.innerHTML = "";
-          return;
-        }
-      } else if (currentMode === "GRN") {
-        payload.vendorName = document.getElementById('vendorNameCustom').value.trim();
-        payload.vendorGst = document.getElementById('vendorGst').value.trim();
-        payload.challanRef = document.getElementById('challanRef').value.trim();
-        if (!payload.vendorName) {
-          alert("Please enter Vendor Name!");
-          submitBtn.disabled = false;
-          statusMsg.innerHTML = "";
-          return;
-        }
+      // Type ke hisab se party details set karein
+      if(docMode === 'DC' || docMode === 'BOM') {
+        payload.clientName = selectedParty.name;
+        payload.clientAddress = selectedParty.address;
+        payload.placeOfSupply = selectedParty.placeOfSupply;
+      } else {
+        payload.vendorName = selectedParty.name;
+        payload.vendorGst = selectedParty.gst;
       }
 
-      selectedItemsArray.forEach(function(item) {
-        if (currentMode === "DC") {
-          payload.items.push({
-            name: item.name,
-            qty: item.qty,
-            unit: item.unit,
-            hsn: item.hsn
-          });
-        } else if (currentMode === "GRN") {
-          payload.items.push({
-            name: item.name,
-            billedQty: item.billedQty,
-            rcvdQty: item.rcvdQty,
-            acceptedQty: item.acceptedQty,
-            rejectedQty: Math.max(0, Number(item.rcvdQty) - Number(item.acceptedQty)),
-            remarks: "OK"
-          });
-        } else if (currentMode === "BOM") {
-          payload.items.push({
-            name: item.name,
-            qtyIssued: item.qty,
-            unit: item.unit,
-            remarks: ""
-          });
-        }
-      });
-
-      fetch(SCRIPT_ENDPOINT, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
+      btn.disabled = true; btn.style.background = "#ccc"; 
+      msg.innerText = "Processing & Creating Document..."; msg.style.color = "blue";
+      
+      // Google Script ko Data bhejein
+      fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' }, // Google Scripts requires text/plain for POST
         body: JSON.stringify(payload)
       })
-      .then(function() {
-        document.getElementById('mainFormContainer').style.display = 'none';
-        statusMsg.innerHTML = `
-          <div style="background:#e8f5e9; border: 1px solid #81c784; padding:24px; border-radius:8px; margin-top:15px; color:#2e7d32; text-align:center;">
-            <div style="font-size:36px; margin-bottom:8px;">✅</div>
-            <b style="font-size:16px;">Document Submitted Successfully!</b><br>
-            <p style="font-size:13px; color:#555; margin-top:6px;">Document is generated and saved in Google Drive.</p>
-            <br>
-            <button onclick="location.reload()" style="padding:10px 18px; background:var(--primary); color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">➕ Create Another Entry</button>
-          </div>
-        `;
-      })
-      .catch(function(err) {
-        alert("Submission failed. Check network.");
-        submitBtn.disabled = false;
-        statusMsg.innerHTML = "";
+      .then(res => res.json())
+      .then(res => {
+        if(res.success) {
+          msg.innerHTML = `Success! <a href="${res.result.url}" target="_blank" style="color:green;">Open Document</a>`;
+          SEL = []; render();
+        } else {
+          msg.innerText = "Error: " + (res.error || "Unknown Error"); 
+          msg.style.color = "red";
+        }
+        btn.disabled = false; btn.style.background = "#1a73e8";
+      }).catch(err => {
+        msg.innerText = "Failed to submit. Check console/network."; 
+        btn.disabled = false; btn.style.background = "#1a73e8";
       });
     }
+
+    // Page load hote hi data fetch karna shuru karein
+    window.onload = loadData;
   </script>
 </body>
 </html>
